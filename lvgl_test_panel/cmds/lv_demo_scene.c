@@ -218,8 +218,9 @@ static void visuals_create(lv_obj_t * parent)
     grid_w = lv_page_get_width_grid(parent, 2, 1);
     grid_h = lv_page_get_height_grid(parent, 5, 1);
 
+
     lv_obj_set_width(bar_h, grid_w);
-    //lv_obj_set_height(bar_h, lv_page_get_height_grid(parent, 5, 1));
+    lv_obj_set_height(bar_h, lv_page_get_height_grid(parent, 2, 1));
 
 
     bar_sensor[0] = lv_bar_create(bar_h, NULL);
@@ -272,6 +273,7 @@ static void visuals_create(lv_obj_t * parent)
     lv_obj_add_style(h, LV_CONT_PART_MAIN, &style_box);
     lv_obj_set_drag_parent(h, true);
     lv_obj_set_width(h, lv_page_get_width_grid(parent, 2, 1));
+    lv_obj_set_height(h, lv_page_get_height_grid(parent, 2, 1));
     lv_obj_set_style_local_value_str(h, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, "Controls");
 
     switch_state = lv_switch_create(h, NULL);

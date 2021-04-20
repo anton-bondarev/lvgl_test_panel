@@ -16,7 +16,7 @@
 
 #include "lvgl_port.h"
 
-#define TIMER_TICK_PERIOD 100
+#define TIMER_TICK_PERIOD 50
 
 static char *fb_path;
 static char *input_dev_path;
