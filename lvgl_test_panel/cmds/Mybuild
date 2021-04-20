@@ -1,0 +1,16 @@
+package ext_project.lvgl_test_panel.cmd
+
+@AutoCmd
+@Cmd(name="lvgl_test_panel", help="", man="")
+@BuildDepends(third_party.lib.lvgl)
+@BuildDepends(third_party.lib.lvgl_examples)
+@BuildDepends(third_party.lib.lvgl_display_port_api)
+module lvgl_test_panel {
+	source "lvgl_demo.c",
+		"mouse_cursor_icon.c",
+		"lv_demo_scene.c"
+
+	@NoRuntime depends third_party.lib.lvgl
+	@NoRuntime depends third_party.lib.lvgl_examples
+	@NoRuntime depends third_party.lib.lvgl_display_port_api
+}
