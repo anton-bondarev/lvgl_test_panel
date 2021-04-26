@@ -1,0 +1,10 @@
+package ext_project.lvgl_test_panel.lib
+
+static module libleddrv {
+	option number leds_quantity = 80
+
+	source "libleddrv.c"
+
+	@IncludeExport(path="")
+	source "libleddrv.h"
+}

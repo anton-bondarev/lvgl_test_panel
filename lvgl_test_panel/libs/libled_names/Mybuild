@@ -1,0 +1,8 @@
+package ext_project.lvgl_test_panel.lib
+
+static module libled_names {
+	source "libled_names.c"
+
+	@IncludeExport(path="")
+	source "led_names.h"
+}
