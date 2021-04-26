@@ -27,9 +27,9 @@
 
 //#define NEIGHBOUR_ADDR "10.0.2.10"
 
-#define NEIGHBOUR_ADDR "192.168.2.1"
+#define NEIGHBOUR_ADDR "192.168.0.42"
 
-#define NEIGHBOUR_PORT 1502
+#define NEIGHBOUR_PORT 502
 
 #if USE_HTTP_CONTROL
 static int sock_fd;
@@ -134,15 +134,15 @@ static void update_sersors(void) {
 	if (rc < 0) {
 		printf("modbus_read_input_registers error %d ", rc);
 	}
-	sensor_value[0] = tab_input_registers[0];
+	sensor_value[0] = (int16_t)tab_input_registers[0];
 
-	sensor_value[1] = tab_input_registers[2];
+	sensor_value[1] = (int16_t)tab_input_registers[2];
 
-	sensor_value[2] = tab_input_registers[4];
+	sensor_value[2] = (int16_t)tab_input_registers[4];
 
-	sensor_value[3] = tab_input_registers[6];
+	sensor_value[3] = (int16_t)tab_input_registers[6];
 
-	sensor_value[4] = tab_input_registers[8];
+	sensor_value[4] = (int16_t)tab_input_registers[8];
 
 	test_panel_set_sensor(sensor_value);
 }

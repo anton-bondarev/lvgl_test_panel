@@ -277,10 +277,23 @@ static void visuals_create(lv_obj_t * parent)
 
 void test_panel_set_sensor(int value[5]) {
 	int i;
+#if 1
+	for (i = 0; i < 5; i ++) {
+		char main_buff[8];
+		char rest_buff[8];
+		char text_buff[16];
 
+		itoa(value[i] / 100, main_buff, 10);
+		itoa(abs(value[i]) % 100, rest_buff, 10);
+		sprintf(text_buff, "%s.%s", main_buff, rest_buff);
+		lv_textarea_set_text(ta_sensor[i],text_buff);
+		lv_bar_set_value(bar_sensor[i], value[i]/100, LV_ANIM_OFF);
+	}
+#else
 	for (i = 0; i < 5; i ++) {
 		char buff[10];
 		lv_textarea_set_text(ta_sensor[i],itoa(value[i], buff, 10));
 		lv_bar_set_value(bar_sensor[i], value[i], LV_ANIM_OFF);
 	}
+#endif
 }
