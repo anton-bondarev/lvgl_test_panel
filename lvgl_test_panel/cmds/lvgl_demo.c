@@ -9,14 +9,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
+#include <netinet/in.h>
+
 #include <kernel/time/timer.h>
 
 #include "lvgl.h"
-#include "lv_examples.h"
 
 #include "lvgl_port.h"
 
+#include <modbus.h>
+
+#define USE_HTTP_CONTROL 0
+
 #define TIMER_TICK_PERIOD 50
+
+
+//#define NEIGHBOUR_ADDR "10.0.2.10"
+
+#define NEIGHBOUR_ADDR "192.168.2.1"
+
+#define NEIGHBOUR_PORT 1502
+
+#if USE_HTTP_CONTROL
+static int sock_fd;
+#else
+static modbus_t *ctx;
+#endif
 
 static char *fb_path;
 static char *input_dev_path;
@@ -62,6 +81,7 @@ static int hal_init(void) {
 		goto err_free;
 	}
 
+
 	/* Add the mouse as input device */
 	lv_indev_drv_init(&indev_drv);
 	indev_drv.type = LV_INDEV_TYPE_POINTER;
@@ -88,9 +108,13 @@ err_free:
 	free(buf1_1);
 	return -1;
 }
-extern void test_panel_set_sensor(int value[5]);
+
 static void update_sersors(void) {
+	extern void test_panel_set_sensor(int value[5]);
 	static int sensor_value[5]= {0};
+	static uint16_t tab_input_registers[123];
+	int rc;
+#if 0
 	sensor_value[0]++;
 	sensor_value[0] = sensor_value[0] % 100;
 
@@ -105,12 +129,43 @@ static void update_sersors(void) {
 
 	sensor_value[4] += 5;
 	sensor_value[4] = sensor_value[4] % 100;
+#endif
+	rc = modbus_read_input_registers(ctx, 0, 123, tab_input_registers);
+	if (rc < 0) {
+		printf("modbus_read_input_registers error %d ", rc);
+	}
+	sensor_value[0] = tab_input_registers[0];
+
+	sensor_value[1] = tab_input_registers[2];
+
+	sensor_value[2] = tab_input_registers[4];
+
+	sensor_value[3] = tab_input_registers[6];
+
+	sensor_value[4] = tab_input_registers[8];
 
 	test_panel_set_sensor(sensor_value);
 }
 
+#define REQUEST_CLR "GET /cgi-bin/led_driver?cmd=clr&led=0 HTTP/1.1\r\n\r\n"
+#define REQUEST_SET "GET /cgi-bin/led_driver?cmd=set&led=0 HTTP/1.1\r\n\r\n"
 void test_panel_update_button(int state) {
 	printf("State: %s\n", state ? "On" : "Off");
+#if USE_HTTP_CONTROL
+	if (sock_fd) {
+		if (state) {
+			send(sock_fd, REQUEST_SET, sizeof(REQUEST_SET) - 1, 0);
+		} else {
+			send(sock_fd, REQUEST_CLR, sizeof(REQUEST_CLR) - 1, 0);
+		 }
+	}
+#else
+	if (1 == modbus_write_bit(ctx, 0,  state ? ON : OFF)) {
+		printf("OK\n");
+	} else {
+		printf("FAILED\n");
+	}
+#endif
 }
 
 static void lvgl_timer_handler(struct sys_timer *timer, void *param) {
@@ -127,6 +182,56 @@ static void print_usage(void) {
 	);
 }
 
+static int socket_init(void) {
+#if USE_HTTP_CONTROL
+	struct sockaddr_in cliaddr;
+
+	memset(&cliaddr, 0, sizeof cliaddr);
+	cliaddr.sin_family = AF_INET;
+	cliaddr.sin_port = htons(NEIGHBOUR_PORT);
+	if (inet_aton(NEIGHBOUR_ADDR, &cliaddr.sin_addr) == 0) {
+		printf("Fail\n");
+		return 0;
+	}
+	sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (sock_fd == -1) {
+		perror("socket");
+		sock_fd = 0;
+		return -errno;
+	}
+
+	if (-1 == connect(sock_fd, (struct sockaddr *)&cliaddr, sizeof(cliaddr))) {
+		perror("connect");
+		close(sock_fd);
+		sock_fd = 0;
+		return -errno;
+	}
+
+#else
+	const char *ip = NEIGHBOUR_ADDR;
+	unsigned short port = NEIGHBOUR_PORT;
+
+	ctx = modbus_new_tcp(ip, port);
+	if (ctx == NULL) {
+		fprintf(stderr, "Unable to allocate libmodbus context\n");
+		return -1;
+	}
+
+	modbus_set_debug(ctx, TRUE);
+	modbus_set_error_recovery(ctx,
+			MODBUS_ERROR_RECOVERY_LINK |
+			MODBUS_ERROR_RECOVERY_PROTOCOL);
+
+	if (modbus_connect(ctx) == -1) {
+		fprintf(stderr, "Connection failed: %s\n",
+				modbus_strerror(errno));
+		modbus_free(ctx);
+		return -1;
+	}
+#endif
+	return 0;
+}
+extern void lv_demo_widgets(void);
 int main(int argc, char **argv) {
 	int opt;
 	struct sys_timer *timer;
@@ -163,6 +268,8 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
+	socket_init();
+
 	lv_demo_widgets();
 
 	timer_set(&timer, TIMER_PERIODIC, TIMER_TICK_PERIOD, lvgl_timer_handler, NULL);
@@ -180,5 +287,13 @@ int main(int argc, char **argv) {
 		}
 	}
 
+
+	/* Close the connection */
+#if USE_HTTP_CONTROL
+	close(sock_fd);
+#else
+	modbus_close(ctx);
+	modbus_free(ctx);
+#endif
 	return 0;
 }

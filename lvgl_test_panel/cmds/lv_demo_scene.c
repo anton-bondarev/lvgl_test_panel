@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "lvgl.h"
-#include "lv_examples.h"
 
 /*********************
  *      DEFINES
@@ -21,11 +20,6 @@
  **********************/
 static void controls_create(lv_obj_t * parent);
 static void visuals_create(lv_obj_t * parent);
-
-#if LV_DEMO_WIDGETS_SLIDESHOW
-static void tab_content_anim_create(lv_obj_t * parent);
-static void tab_changer_task_cb(lv_task_t * task);
-#endif
 
 /**********************
  *  STATIC VARIABLES
