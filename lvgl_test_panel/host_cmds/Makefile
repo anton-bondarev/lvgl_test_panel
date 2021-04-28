@@ -27,16 +27,14 @@ $(BUILD_BASE)/libmodbus/lib/pkgconfig/libmodbus.pc : libmodbus-$(LIBMODBUS_VER).
 libmodbus: $(BUILD_BASE)/libmodbus/lib/pkgconfig/libmodbus.pc
 
 led-server led-client : CFLAGS += -Wall -g3 -O0 $(CFLAGS_LIBMODBUS_INCLUDES)
-
-$(EMULATE_BASE)/conf/leds.txt:
-	mkdir -p $(EMULATE_BASE)/conf
-	cp leds.txt $(EMULATE_BASE)/conf/leds.txt
 	
 led-client : libmodbus
+	mkdir -p $(EMULATE_BASE)
 	gcc $(CFLAGS) led-client.c -o $(EMULATE_BASE)/$@ $(LD_FLAGS_LIBMODBUS)
 
-led-server : libmodbus $(EMULATE_BASE)/conf/leds.txt
+led-server : libmodbus
 led-server : modbus_server.c
+	mkdir -p $(EMULATE_BASE)
 	$(CC) $(CFLAGS) modbus_server.c -o $(EMULATE_BASE)/$@ $(LD_FLAGS_LIBMODBUS)
 
 clean :
