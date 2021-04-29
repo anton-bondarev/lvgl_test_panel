@@ -17,6 +17,7 @@
 #include "lvgl.h"
 
 #include "lvgl_port.h"
+#include <modbus_server_conf.h>
 
 #include <modbus.h>
 
@@ -25,11 +26,6 @@
 #define TIMER_TICK_PERIOD 50
 
 
-//#define NEIGHBOUR_ADDR "10.0.2.10"
-
-#define NEIGHBOUR_ADDR "192.168.0.42"
-
-#define NEIGHBOUR_PORT 502
 
 #if USE_HTTP_CONTROL
 static int sock_fd;

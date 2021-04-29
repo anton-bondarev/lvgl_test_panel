@@ -7,6 +7,7 @@ package ext_project.lvgl_test_panel.cmd
 @BuildDepends(third_party.lib.lvgl_display_port_api)
 @Cmd(name="lvgl_test_panel", help="", man="")
 module lvgl_test_panel {
+	@IncludePath("$(CONF_DIR)")
 	source "lvgl_demo.c",
 		"mouse_cursor_icon.c",
 		"lv_demo_scene.c"
