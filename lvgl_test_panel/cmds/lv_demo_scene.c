@@ -281,11 +281,18 @@ void test_panel_set_sensor(int value[5]) {
 	for (i = 0; i < 5; i ++) {
 		char main_buff[8];
 		char rest_buff[8];
-		char text_buff[16];
+		char text_buff[18];
 
-		itoa(value[i] / 100, main_buff, 10);
+		itoa(abs(value[i]) / 100, main_buff, 10);
+		if ((abs(value[i]) % 100) < 10) {
+		rest_buff[0] = '0';
+		itoa(abs(value[i]) % 100, rest_buff+1, 10);
+		} else {
 		itoa(abs(value[i]) % 100, rest_buff, 10);
-		sprintf(text_buff, "%s.%s", main_buff, rest_buff);
+		}
+		
+		
+		sprintf(text_buff, "%c%s.%s", (value[i] < 0) ? '-':' ', main_buff, rest_buff);
 		lv_textarea_set_text(ta_sensor[i],text_buff);
 		lv_bar_set_value(bar_sensor[i], value[i]/100, LV_ANIM_OFF);
 	}
