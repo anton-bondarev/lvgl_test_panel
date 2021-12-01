@@ -1,0 +1,18 @@
+package ext_project.lvgl_test_panel.cmd
+
+@AutoCmd
+@Build(script="true")
+@BuildDepends(third_party.lib.libmodbus)
+@BuildDepends(third_party.lib.lvgl)
+@BuildDepends(third_party.lib.lvgl_display_port_api)
+@Cmd(name="full_panel", help="", man="")
+module full_panel {
+	@IncludePath("$(CONF_DIR)")
+	source "lvgl_demo.c",
+		"lv_demo_scene.c"
+	source "../mouse_cursor_icon.c"
+
+	@NoRuntime depends third_party.lib.libmodbus
+	@NoRuntime depends third_party.lib.lvgl
+	@NoRuntime depends third_party.lib.lvgl_display_port_api
+}
