@@ -7,33 +7,35 @@
 
 #include "lvgl.h"
 
-/*********************
- *      DEFINES
- *********************/
 
-/**********************
- *      TYPEDEFS
- **********************/
+#define LABEL_HEIGTH 16
 
-/**********************
- *  STATIC PROTOTYPES
- **********************/
 static void controls_create(lv_obj_t * parent);
-
 
 /**********************
  *  STATIC VARIABLES
  **********************/
 static lv_obj_t * tv;
 static lv_obj_t * t1;
+static lv_obj_t * t2;
 
 static lv_style_t style_box;
 
 static lv_obj_t * btn_start;
-//static lv_obj_t * btn_stop;
+#if LVGL_VERSION_MAJOR == 7
+static lv_obj_t * btn_stop;
+#endif
 
 #define SENSORS_QUANTITY   5
-static lv_obj_t * ta_sensor[SENSORS_QUANTITY * 5];
+static lv_obj_t *ta_sensor[SENSORS_QUANTITY * 5];
+static lv_obj_t *ta_press;
+static lv_obj_t *ta_temp;
+static lv_obj_t *ta_mode;
+static lv_obj_t *ta_radio;
+static lv_obj_t *ta_date;
+static lv_obj_t *ta_time;
+static lv_obj_t *ta_place;
+static lv_obj_t *ta_prohod;
 
 extern void test_panel_update_button(int state);
 #if LVGL_VERSION_MAJOR == 7
@@ -91,7 +93,8 @@ void lv_demo_widgets(void) {
 #else
 	tv = lv_tabview_create(lv_scr_act(),LV_DIR_TOP, LV_DPX(45));
 #endif
-	t1 = lv_tabview_add_tab(tv, "Basic");
+	t1 = lv_tabview_add_tab(tv, "INFO");
+	t2 = lv_tabview_add_tab(tv, "Settings");
 
 	lv_style_init(&style_box);
 #if LVGL_VERSION_MAJOR == 7
@@ -168,6 +171,213 @@ static inline const char *get_sensor_def_str(int i) {
 
 	return "Sen  1";
 }
+
+#if LVGL_VERSION_MAJOR == 7
+#else
+static inline void control_info_create(lv_obj_t *parent) {
+	/************** INFO *********************/
+	lv_obj_t * label;
+	lv_obj_t *cont;
+	static lv_coord_t col_dsc[] = { (180), (180), (180), (180),
+			LV_GRID_TEMPLATE_LAST };
+	static lv_coord_t row_dsc[] = { (LABEL_HEIGTH), (50), (LABEL_HEIGTH), (50),
+			LV_GRID_TEMPLATE_LAST };
+
+	/*Create a container with grid*/
+	cont = lv_obj_create(parent);
+	lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
+	lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
+	lv_obj_set_size(cont, 1004, 220);
+	lv_obj_align(cont, LV_ALIGN_TOP_MID, 0, 0);
+	lv_obj_set_layout(cont, LV_LAYOUT_GRID);
+	lv_obj_set_style_text_font(cont, &lv_font_montserrat_22, 0);
+
+	/* pressure */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Pressure");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 0, 1,
+			LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	ta_press = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_press, LV_GRID_ALIGN_STRETCH, 0, 1,
+			LV_GRID_ALIGN_STRETCH, 1, 1);
+
+	lv_textarea_set_text(ta_press, "1231");
+	lv_textarea_set_placeholder_text(ta_press, "Pressure");
+	lv_textarea_set_one_line(ta_press, true);
+
+	/* temperature */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Temperature");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 1, 1,
+			LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	ta_temp = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_temp, LV_GRID_ALIGN_STRETCH, 1, 1,
+			LV_GRID_ALIGN_STRETCH, 1, 1);
+
+	lv_textarea_set_text(ta_temp, "22");
+	lv_textarea_set_placeholder_text(ta_temp, "temp");
+	lv_textarea_set_one_line(ta_temp, true);
+
+	/* mode */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Mode");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 2, 1,
+			LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	ta_mode = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_mode, LV_GRID_ALIGN_STRETCH, 2, 1,
+			LV_GRID_ALIGN_STRETCH, 1, 1);
+
+	lv_textarea_set_text(ta_mode, "UP");
+	lv_textarea_set_placeholder_text(ta_mode, "mode");
+	lv_textarea_set_one_line(ta_mode, true);
+
+	/* radio */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Radio");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 3, 1,
+			LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	ta_radio = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_radio, LV_GRID_ALIGN_STRETCH, 3, 1,
+			LV_GRID_ALIGN_STRETCH, 1, 1);
+
+	lv_textarea_set_text(ta_radio, "25");
+	lv_textarea_set_placeholder_text(ta_radio, "radio");
+	lv_textarea_set_one_line(ta_radio, true);
+
+	/*************************** line 2 **************/
+
+	/* date */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Date");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 0, 1,
+			LV_GRID_ALIGN_STRETCH, 2, 1);
+
+	ta_date = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_date, LV_GRID_ALIGN_STRETCH, 0, 1,
+			LV_GRID_ALIGN_STRETCH, 3, 1);
+
+	lv_textarea_set_text(ta_date, "10.12.2021");
+	lv_textarea_set_placeholder_text(ta_date, "date");
+	lv_textarea_set_one_line(ta_date, true);
+
+	/* date */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Time");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 1, 1,
+			LV_GRID_ALIGN_STRETCH, 2, 1);
+
+	ta_time = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_time, LV_GRID_ALIGN_STRETCH, 1, 1,
+			LV_GRID_ALIGN_STRETCH, 3, 1);
+
+	lv_textarea_set_text(ta_time, "12:00");
+	lv_textarea_set_placeholder_text(ta_time, "Time");
+	lv_textarea_set_one_line(ta_time, true);
+
+	/* Place */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Place");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 2, 1,
+			LV_GRID_ALIGN_STRETCH, 2, 1);
+
+	ta_place = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_place, LV_GRID_ALIGN_STRETCH, 2, 1,
+			LV_GRID_ALIGN_STRETCH, 3, 1);
+
+	lv_textarea_set_text(ta_place, "Serpuhov");
+	lv_textarea_set_placeholder_text(ta_place, "Place");
+	lv_textarea_set_one_line(ta_place, true);
+
+	/* Prohod */
+	label = lv_label_create(cont);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+	lv_label_set_text(label, "Prohod");
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, 3, 1,
+			LV_GRID_ALIGN_STRETCH, 2, 1);
+
+	ta_prohod = lv_textarea_create(cont);
+	/*Stretch the cell horizontally and vertically too
+	 *Set span to 1 to make the cell 1 column/row sized*/
+	lv_obj_set_grid_cell(ta_prohod, LV_GRID_ALIGN_STRETCH, 3, 1,
+			LV_GRID_ALIGN_STRETCH, 3, 1);
+
+	lv_textarea_set_text(ta_prohod, "1");
+	lv_textarea_set_placeholder_text(ta_prohod, "Prohod");
+	lv_textarea_set_one_line(ta_prohod, true);
+}
+#endif
+
+#if LVGL_VERSION_MAJOR == 7
+#else
+void control_sensors_create(lv_obj_t *parent) {
+	/************** SENSORS *********************/
+	lv_obj_t * label;
+	int i;
+	static lv_coord_t col_dsc[] = { 180, 180, 180, 180, 180,
+			LV_GRID_TEMPLATE_LAST };
+	static lv_coord_t row_dsc[] = { LABEL_HEIGTH, 50, LABEL_HEIGTH, 50, LABEL_HEIGTH, 50, LABEL_HEIGTH, 50, LABEL_HEIGTH, 50,
+			LV_GRID_TEMPLATE_LAST };
+
+	/*Create a container with grid*/
+	lv_obj_t *cont = lv_obj_create(parent);
+	lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
+	lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
+	lv_obj_set_size(cont, 1004, 768 - 60 - 220);
+	lv_obj_set_style_text_font(cont, &lv_font_montserrat_22, 0);
+	lv_obj_align(cont, LV_ALIGN_BOTTOM_MID, 0, 0);
+	lv_obj_set_layout(cont, LV_LAYOUT_GRID);
+
+
+	for (i = 0; i < 25; i++) {
+		uint8_t col = i % 5;
+		uint8_t row = i / 5;
+
+		label = lv_label_create(cont);
+		lv_obj_set_style_text_font(label, &lv_font_montserrat_16, 0);
+		lv_label_set_text_fmt(label, "Sensor %d", i + 1);
+		lv_obj_set_grid_cell(label, LV_GRID_ALIGN_STRETCH, col, 1,
+				LV_GRID_ALIGN_STRETCH, row * 2, 1);
+
+		ta_sensor[i] = lv_textarea_create(cont);
+		/*Stretch the cell horizontally and vertically too
+		 *Set span to 1 to make the cell 1 column/row sized*/
+		lv_obj_set_grid_cell(ta_sensor[i], LV_GRID_ALIGN_STRETCH, col, 1,
+				LV_GRID_ALIGN_STRETCH, row * 2 + 1, 1);
+
+//        label = lv_label_create(obj);
+//        lv_label_set_text_fmt(label, "c%d, r%d", col, row);
+//        lv_obj_center(label);
+		lv_textarea_set_text(ta_sensor[i], "");
+		lv_textarea_set_placeholder_text(ta_sensor[i], get_sensor_def_str(i));
+		lv_textarea_set_one_line(ta_sensor[i], true);
+	}
+}
+#endif
 
 static void controls_create(lv_obj_t *parent) {
 #if LVGL_VERSION_MAJOR == 7
@@ -302,40 +512,9 @@ static void controls_create(lv_obj_t *parent) {
 
 	/*******************/
 #else
-	static lv_coord_t col_dsc[] = { (180), (180), (180), (180), (180),
-			LV_GRID_TEMPLATE_LAST };
-	static lv_coord_t row_dsc[] = { (50), (50), (50), (50), (50),
-			LV_GRID_TEMPLATE_LAST };
 
-	/*Create a container with grid*/
-	lv_obj_t *cont = lv_obj_create(parent);
-	lv_obj_set_style_grid_column_dsc_array(cont, col_dsc, 0);
-	lv_obj_set_style_grid_row_dsc_array(cont, row_dsc, 0);
-	lv_obj_set_size(cont, 1024, 768 - 60);
-	lv_obj_center(cont);
-	lv_obj_set_layout(cont, LV_LAYOUT_GRID);
-
-//    lv_obj_t * label;
-
-	int i;
-	for (i = 0; i < 25; i++) {
-		uint8_t col = i % 5;
-		uint8_t row = i / 5;
-
-		ta_sensor[i] = lv_textarea_create(cont);
-		/*Stretch the cell horizontally and vertically too
-		 *Set span to 1 to make the cell 1 column/row sized*/
-		lv_obj_set_grid_cell(ta_sensor[i], LV_GRID_ALIGN_STRETCH, col, 1,
-				LV_GRID_ALIGN_STRETCH, row, 1);
-
-//        label = lv_label_create(obj);
-//        lv_label_set_text_fmt(label, "c%d, r%d", col, row);
-//        lv_obj_center(label);
-		lv_textarea_set_text(ta_sensor[i], "");
-		lv_textarea_set_placeholder_text(ta_sensor[i], get_sensor_def_str(i));
-		lv_textarea_set_one_line(ta_sensor[i], true);
-		//lv_textarea_set_cursor_hidden(obj, true);
-	}
+	control_info_create(parent);
+	control_sensors_create(parent);
 #endif
 }
 

@@ -145,8 +145,7 @@ err_free:
 static void update_sersors(void) {
 	extern void test_panel_set_sensor(int value[5]);
 	static int sensor_value[5]= {0};
-	static uint16_t tab_input_registers[123];
-	int rc;
+
 #if 0
 	sensor_value[0]++;
 	sensor_value[0] = sensor_value[0] % 100;
@@ -162,7 +161,10 @@ static void update_sersors(void) {
 
 	sensor_value[4] += 5;
 	sensor_value[4] = sensor_value[4] % 100;
-#endif
+#else
+	static uint16_t tab_input_registers[123];
+	int rc;
+
 	rc = modbus_read_input_registers(ctx, 0, 123, tab_input_registers);
 	if (rc < 0) {
 		printf("modbus_read_input_registers error %d ", rc);
@@ -176,7 +178,7 @@ static void update_sersors(void) {
 	sensor_value[3] = (int16_t)tab_input_registers[6];
 
 	sensor_value[4] = (int16_t)tab_input_registers[8];
-
+#endif
 	test_panel_set_sensor(sensor_value);
 }
 
