@@ -8,5 +8,5 @@
 "service httpd",
 //"ntpdate 0.europe.pool.ntp.org",
 "ntpdate 54.36.110.36",
-"lvgl_test_panel /dev/fb0 /dev/ps-mouse",
+"full_panel /dev/fb0 /dev/ps-mouse",
 "tish",
